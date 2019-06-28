@@ -1,0 +1,30 @@
+
+node('') {
+stage ('Initialize') {
+        def mavenHome  = tool 'maven'
+        env.PATH = "${mavenHome}/bin:${env.PATH}"
+}
+stage ('clone versions') {
+dir('VersionsControl') {
+git branch: 'master',
+credentialsId: '34a8d3f6-1a64-4fc7-a24c-751955eed501',
+url: 'https://github.com/SivakrishnaDandu/VersionsControl.git'
+}
+}
+stage ('clone project') {
+dir('my-app') {
+git branch: 'master',
+credentialsId: '34a8d3f6-1a64-4fc7-a24c-751955eed501',
+url: 'https://github.com/SivakrishnaDandu/my-app.git'
+}
+}
+stage ('Version Increment') {
+sh ''' bash $WORKSPACE/VersionsControl/script.sh $WORKSPACE '''
+}
+stage ('Build') {
+sh '''
+cd $WORKSPACE/my-app/
+mvn clean install
+'''
+}
+}
